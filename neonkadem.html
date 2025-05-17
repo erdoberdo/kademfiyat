@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiyat Hesaplama Aracı</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        #settingsPanel {
+            display: none;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .optional-input {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .optional-input label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .optional-input input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        #manualProductionHour {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fiyat Hesaplama Aracı</h1>
+        <div id="mainPanel">
+            <div class="input-group">
+                <label for="neon">Neon (Metre):</label>
+                <input type="number" id="neon" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="height">Yükseklik (cm):</label>
+                <input type="number" id="height" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="width">Genişlik (cm):</label>
+                <input type="number" id="width" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="adaptor">Adaptör Sayısı:</label>
+                <input type="number" id="adaptor" step="1" min="0">
+            </div>
+            <div class="optional-input">
+                <label>
+                    <input type="checkbox" id="useManualProductionHour" onchange="toggleManualProductionHour()">
+                    Üretim saatini manuel belirle
+                </label>
+                <div id="manualProductionHour" class="input-group">
+                    <label for="productionHour">Üretim Saati:</label>
+                    <input type="number" id="productionHour" step="0.25" min="0.25">
+                </div>
+            </div>
+            <button onclick="calculate()">Hesapla</button>
+            <button onclick="toggleSettings()">Ayarlar</button>
+
+            <div id="result"></div>
+        </div>
+
+        <div id="settingsPanel">
+            <h2>Ayarlar</h2>
+            <div class="settings-grid">
+                <div class="input-group">
+                    <label for="dollar">Dolar:</label>
+                    <input type="number" id="dollar" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="neonm">neon_m:</label>
+                    <input type="number" id="neonm" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="adaptorcost">adaptör:</label>
+                    <input type="number" id="adaptorcost" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="cable">Kablo:</label>
+                    <input type="number" id="cable" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="glue">yapıştırıcı:</label>
+                    <input type="number" id="glue" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="fuel">yakıt:</label>
+                    <input type="number" id="fuel" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="cutting">kesim:</label>
+                    <input type="number" id="cutting" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="rent">kira:</label>
+                    <input type="number" id="rent" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="salaries">maaşlar:</label>
+                    <input type="number" id="salaries" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="generalexpenses">dükkan genel gider:</label>
+                    <input type="number" id="generalexpenses" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="workingdays">ayda çalışılan gün:</label>
+                    <input type="number" id="workingdays" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="workinghours">günde çalışılan saat:</label>
+                    <input type="number" id="workinghours" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="profitmultiplier">kar çarpanı:</label>
+                    <input type="number" id="profitmultiplier" step="0.01">
+                </div>
+            </div>
+            <button onclick="saveSettings()">Kaydet</button>
+            <button onclick="toggleSettings()">Geri Dön</button>
+        </div>
+    </div>
+
+    <script>
+        let variables = {
+            "Dolar": 33.50, "neon_m": 2.5, "adaptör": 3.5, "Kablo": 30,
+            "yapıştırıcı": 30, "yakıt": 100, "kesim": 100, "kira": 9000,
+            "maaşlar": 60000, "dükkan genel gider": 9000, "ayda çalışılan gün": 26,
+            "günde çalışılan saat": 10, "kar çarpanı": 1.75
+        };
+
+        function loadVariables() {
+            const savedVariables = localStorage.getItem('variables');
+            if (savedVariables) {
+                variables = JSON.parse(savedVariables);
+            }
+            updateSettingsInputs();
+        }
+
+        function updateSettingsInputs() {
+            document.getElementById('dollar').value = variables["Dolar"];
+            document.getElementById('neonm').value = variables["neon_m"];
+            document.getElementById('adaptorcost').value = variables["adaptör"];
+            document.getElementById('cable').value = variables["Kablo"];
+            document.getElementById('glue').value = variables["yapıştırıcı"];
+            document.getElementById('fuel').value = variables["yakıt"];
+            document.getElementById('cutting').value = variables["kesim"];
+            document.getElementById('rent').value = variables["kira"];
+            document.getElementById('salaries').value = variables["maaşlar"];
+            document.getElementById('generalexpenses').value = variables["dükkan genel gider"];
+            document.getElementById('workingdays').value = variables["ayda çalışılan gün"];
+            document.getElementById('workinghours').value = variables["günde çalışılan saat"];
+            document.getElementById('profitmultiplier').value = variables["kar çarpanı"];
+        }
+
+        function saveSettings() {
+            variables["Dolar"] = parseFloat(document.getElementById('dollar').value);
+            variables["neon_m"] = parseFloat(document.getElementById('neonm').value);
+            variables["adaptör"] = parseFloat(document.getElementById('adaptorcost').value);
+            variables["Kablo"] = parseFloat(document.getElementById('cable').value);
+            variables["yapıştırıcı"] = parseFloat(document.getElementById('glue').value);
+            variables["yakıt"] = parseFloat(document.getElementById('fuel').value);
+            variables["kesim"] = parseFloat(document.getElementById('cutting').value);
+            variables["kira"] = parseFloat(document.getElementById('rent').value);
+            variables["maaşlar"] = parseFloat(document.getElementById('salaries').value);
+            variables["dükkan genel gider"] = parseFloat(document.getElementById('generalexpenses').value);
+            variables["ayda çalışılan gün"] = parseFloat(document.getElementById('workingdays').value);
+            variables["günde çalışılan saat"] = parseFloat(document.getElementById('workinghours').value);
+            variables["kar çarpanı"] = parseFloat(document.getElementById('profitmultiplier').value);
+
+            localStorage.setItem('variables', JSON.stringify(variables));
+            alert('Ayarlar kaydedildi');
+            toggleSettings();
+        }
+
+        function calculateProductionHour(neon, height, width) {
+            const baseTime = 0.25;
+            const neonFactor = 0.4;
+            const areaFactor = 0.00007;
+
+            let estimatedTime = baseTime + (neon * neonFactor) + ((height * width) * areaFactor);
+            
+            return Math.round(estimatedTime * 4) / 4;
+        }
+
+        function toggleManualProductionHour() {
+            const manualInput = document.getElementById('manualProductionHour');
+            manualInput.style.display = document.getElementById('useManualProductionHour').checked ? 'block' : 'none';
+        }
+
+        function calculate() {
+            const neon = parseFloat(document.getElementById('neon').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const adaptor = parseInt(document.getElementById('adaptor').value) || 0;
+
+            let productionHour;
+            if (document.getElementById('useManualProductionHour').checked) {
+                productionHour = parseFloat(document.getElementById('productionHour').value);
+            } else {
+                productionHour = calculateProductionHour(neon, height, width);
+            }
+
+            const satisFiyati = calculatePrice(neon, height, width, productionHour, adaptor);
+
+            document.getElementById('result').innerHTML = `
+                <p>Tahmini Üretim Süresi: ${productionHour.toFixed(2)} saat</p>
+                <p>Satış Fiyatı: ${satisFiyati.toFixed(2)} TL</p>
+            `;
+        }
+
+        function calculatePrice(neon, height, width, productionHour, adaptor) {
+            const neonMaliyeti = neon * variables["Dolar"] * variables["neon_m"];
+            const pleksiglasMaliyeti = (height * width) * 0.11;
+            const adaptorMaliyeti = adaptor * variables["adaptör"] * variables["Dolar"];
+            const sabitMaliyetler = variables["Kablo"] + variables["yapıştırıcı"] + variables["yakıt"] + variables["kesim"];
+            const dukkanGiderleriToplam = variables["kira"] + variables["maaşlar"] + variables["dükkan genel gider"];
+            const gunlukMaliyet = dukkanGiderleriToplam / variables["ayda çalışılan gün"];
+            const saatlikMaliyet = gunlukMaliyet / variables["günde çalışılan saat"];
+            const iscilikMaliyeti = productionHour * saatlikMaliyet;
+            const toplamMaliyet = neonMaliyeti + pleksiglasMaliyeti + adaptorMaliyeti + sabitMaliyetler + iscilikMaliyeti;
+            return toplamMaliyet * variables["kar çarpanı"];
+        }
+
+        function toggleSettings() {
+            const mainPanel = document.getElementById('mainPanel');
+            const settingsPanel = document.getElementById('settingsPanel');
+            if (settingsPanel.style.display === 'none' || settingsPanel.style.display === '') {
+                mainPanel.style.display = 'none';
+                settingsPanel.style.display = 'block';
+            } else {
+                mainPanel.style.display = 'block';
+                settingsPanel.style.display = 'none';
+            }
+        }
+
+        loadVariables();
+    </script>
+</body>
+</html>
